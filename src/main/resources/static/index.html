@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrbitTrack | ISS Telemetry & Ground Geofencing Operations</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet">
+
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <!-- Modular Custom Stylesheet -->
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2a1 1 0 0 1 1 1v1.07A8.002 8.002 0 0 1 19.93 11H21a1 1 0 0 1 0 2h-1.07A8.002 8.002 0 0 1 13 19.93V21a1 1 0 0 1-2 0v-1.07A8.002 8.002 0 0 1 4.07 13H3a1 1 0 0 1 0-2h1.07A8.002 8.002 0 0 1 11 4.07V3a1 1 0 0 1 1-1zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>ORBITTRACK <span>ISS-25544</span></h1>
+                <p>Spacecraft Telemetry & Geofencing Operations Center</p>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <!-- Indian Standard Time (IST) & UTC Header Clock -->
+            <div class="time-badge">
+                <span class="label">IST (India)</span>
+                <span class="val" id="ist-clock-display">--:--:--</span>
+            </div>
+            <div class="time-badge">
+                <span class="label" style="color: var(--cyan);">UTC</span>
+                <span class="val" id="utc-clock-display">--:--:--</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <div class="status-badge" id="sse-badge">
+                <div class="status-dot"></div>
+                <span id="sse-status-text">LIVE STREAM ONLINE</span>
+            </div>
+
+            <!-- Flyover Predictor Button -->
+            <button class="btn-action btn-accent" id="btn-open-predictor" title="Predict upcoming visible ISS flyovers & AOS/LOS" style="background: rgba(234, 179, 8, 0.2); border-color: var(--gold); color: #facc15;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Predict Flyovers
+            </button>
+
+            <!-- Excel Ground Station Import Button -->
+            <button class="btn-action" id="btn-open-import" title="Upload Excel sheet to add ground stations">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                Import Stations
+            </button>
+
+            <!-- Phase C: Mission PDF Audit Report Export Button -->
+            <button class="btn-action btn-pdf" id="btn-export-pdf" title="Download Official Mission Audit PDF Report">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Mission PDF
+            </button>
+
+            <!-- Phase C: Mission Excel Audit Report Export Button -->
+            <button class="btn-action btn-excel" id="btn-export-excel" title="Download Official Mission Audit Excel (.xlsx) Workbook">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polygon points="10 9 12 11 14 9"/></svg>
+                Mission Excel
+            </button>
+
+            <!-- Feature 5: Automated Flyover Email Alerts Dispatcher Button -->
+            <button class="btn-action btn-notify" id="btn-open-alert" title="Configure Automated ISS Flyover Email Alerts">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Email Alerts
+            </button>
+
+            <button class="btn-action" id="btn-sync" title="Sync latest data with backend">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                Sync
+            </button>
+        </div>
+    </header>
+
+    <!-- Top Telemetry Metrics HUD Strip (6 UNIQUE, NON-DUPLICATED CARDS) -->
+    <div class="hud-strip">
+        <!-- 1. Coordinates -->
+        <div class="hud-card">
+            <div class="hud-label">
+                Coordinates
+                <span style="color: var(--cyan);">LAT / LON</span>
+            </div>
+            <div class="hud-value" id="hud-coords">--° N, --° E</div>
+            <div class="hud-sub" id="hud-coords-raw">Lat: 0.0000 | Lon: 0.0000</div>
+        </div>
+
+        <!-- 2. Orbital Velocity -->
+        <div class="hud-card accent-purple">
+            <div class="hud-label">
+                Orbital Velocity
+                <span style="color: var(--purple);">SPEED</span>
+            </div>
+            <div class="hud-value" id="hud-velocity">7.66 <span class="hud-unit">km/s</span></div>
+            <div class="hud-sub" id="hud-velocity-kmh">27,576 km/h • Mach 22.5</div>
+        </div>
+
+        <!-- 3. Altitude -->
+        <div class="hud-card accent-emerald">
+            <div class="hud-label">
+                Orbital Altitude
+                <span style="color: var(--emerald);">ALTITUDE</span>
+            </div>
+            <div class="hud-value" id="hud-altitude">420.0 <span class="hud-unit">km</span></div>
+            <div class="hud-sub">Low Earth Orbit (LEO)</div>
+        </div>
+
+        <!-- 4. Closest Ground Station -->
+        <div class="hud-card accent-amber" id="hud-station-card">
+            <div class="hud-label">
+                Closest Tracking Station
+                <span style="color: var(--amber);" id="hud-station-proximity">SCANNING...</span>
+            </div>
+            <div class="hud-value" id="hud-station-name" style="font-size: 0.95rem; line-height: 1.3;">Scanning...</div>
+            <div class="hud-sub" id="hud-station-dist" style="color: var(--amber);">Calculating Range...</div>
+        </div>
+
+        <!-- 5. Solar Illumination State -->
+        <div class="hud-card accent-gold">
+            <div class="hud-label">
+                Solar Illumination
+                <span style="color: var(--gold);">EXPOSURE</span>
+            </div>
+            <div class="hud-value" id="hud-visibility" style="font-size: 1.05rem;">DAYLIGHT ☀️</div>
+            <div class="hud-sub" id="hud-visibility-detail">Direct Sunlight Illumination</div>
+        </div>
+
+        <!-- 6. Ingestion Pipeline & Interval -->
+        <div class="hud-card accent-rose">
+            <div class="hud-label">
+                Telemetry Pipeline
+                <span style="color: var(--rose);">POLLING CYCLE</span>
+            </div>
+            <div class="hud-value" id="hud-engine" style="font-size: 0.92rem; color: #38bdf8;">LIVE STREAM (10s)</div>
+            <div class="hud-sub" id="hud-last-sync">Sync: Active</div>
+        </div>
+    </div>
+
+    <!-- Workspace: Map and Mission Analytics Sidebar -->
+    <div class="workspace">
+        <div id="map-column">
+            <!-- Dedicated Map Operations Bar (Completely Outside the Map) -->
+            <div class="map-operations-bar">
+                <button class="map-op-pill" id="btn-toggle-basemap" title="Toggle between Dark Gray Radar and Satellite Photography">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    <span id="basemap-label">Switch: Satellite Photo</span>
+                </button>
+                <button class="map-op-pill active" id="btn-toggle-terminator" title="Toggle Solar Day/Night Shadow">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    Day/Night Shadow
+                </button>
+                <button class="map-op-pill active" id="btn-toggle-projected-orbit" title="Toggle Projected Sine Wave Track">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M20 12l-4-4"/><path d="M20 12l-4 4"/></svg>
+                    Projected Sine Track
+                </button>
+                <button class="map-op-pill active" id="btn-toggle-rings" title="Toggle 2,000 km Geofence Range Bubbles">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+                    2,000 km Geofences
+                </button>
+                <button class="map-op-pill active" id="btn-toggle-stations" title="Toggle Ground Station Markers">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    <span id="stations-count-label">46 Ground Stations</span>
+                </button>
+                <button class="map-op-pill" id="btn-center" title="Re-center map on ISS current position">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                    Center ISS
+                </button>
+            </div>
+
+            <!-- Full Unobstructed Leaflet Map Container (100% clean view) -->
+            <div id="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Right Mission Analytics & Alerts Sidebar -->
+        <aside class="sidebar">
+            <!-- Analytics Summary Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <span>MISSION OPERATIONS TOTALS</span>
+                    <span class="badge-count" id="stat-records">0 PINGS</span>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="stat-box">
+                        <div class="stat-box-label">Cumulative Traveled</div>
+                        <div class="stat-box-val" id="stat-dist">0 km</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-label">Completed Passes</div>
+                        <div class="stat-box-val" id="stat-alerts-count" style="color: var(--cyan);">0</div>
+                    </div>
+                    <div class="stat-box" style="grid-column: span 2;">
+                        <div class="stat-box-label">Most Visited Tracking Hub</div>
+                        <div class="stat-box-val" id="stat-top-station" style="font-size: 0.85rem; color: #ffffff;">Analyzing...</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <div class="progress-labels">
+                        <span>Daylight vs Shadow Ratio</span>
+                        <span id="stat-sunlight-pct">0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="stat-sunlight-bar" style="width: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Alerts Stream Section -->
+            <div class="sidebar-section" style="padding-bottom: 6px;">
+                <div class="sidebar-title">
+                    <span>STATION PASS HISTORY</span>
+                    <span class="badge-count" id="alerts-count-badge">0 PASSES</span>
+                </div>
+                <p style="font-size: 0.68rem; color: var(--text-muted);">
+                    Logged whenever the ISS flies through and completes a pass over a ground station's 2,000 km radio radius.
+                </p>
+            </div>
+
+            <div class="alerts-feed-container" id="alerts-container">
+                <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.78rem;">
+                    Listening for ground station pass alerts...
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Ground Station Excel Bulk Ingestion Modal -->
+    <div id="import-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    <span>Import Ground Stations (Excel / Apache POI)</span>
+                </div>
+                <button class="modal-close-btn" id="btn-close-modal">&times;</button>
+            </div>
+
+            <!-- Download Pre-formatted Template -->
+            <div class="template-banner">
+                <div class="template-info">
+                    <h4>Download Pre-Formatted Excel Template</h4>
+                    <p>Pre-populated with ISRO, NASA DSN, ESA, and KSAT stations.</p>
+                </div>
+                <button class="btn-action" id="btn-download-template" style="background: #1e3a8a; border-color: var(--cyan); color: #ffffff;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download .xlsx
+                </button>
+            </div>
+
+            <!-- Drag & Drop Upload Zone -->
+            <div class="upload-drop-zone" id="upload-drop-zone">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <h5>Click or Drag & Drop Excel File Here</h5>
+                <p>Supported formats: <b>.xlsx, .xls</b> (Parsed via Apache POI into PostgreSQL)</p>
+                <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display: none;">
+            </div>
+
+            <!-- Upload Status Div -->
+            <div class="upload-status" id="upload-status"></div>
+        </div>
+    </div>
+
+    <!-- Phase B: Next Pass Predictor (AOS / LOS) Modal -->
+    <div id="predictor-modal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 680px; width: 680px; box-sizing: border-box; overflow: hidden;">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span>Orbital Flyover Predictor (AOS / LOS Engine)</span>
+                </div>
+                <button class="modal-close-btn" id="btn-close-pred-modal">&times;</button>
+            </div>
+
+            <!-- Target Selection Controls -->
+            <div class="predictor-controls-row" style="margin-bottom: 12px;">
+                <div class="form-group" style="flex: 1.8;">
+                    <label class="form-label">Observer Target Location</label>
+                    <select id="pred-location-select" class="form-select" style="width: 100%;"></select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Forecast Window</label>
+                    <select id="pred-days-select" class="form-select" style="width: 100%;">
+                        <option value="1">Next 24 Hours</option>
+                        <option value="2" selected>Next 48 Hours (2 Days)</option>
+                        <option value="3">Next 72 Hours (3 Days)</option>
+                        <option value="5">Next 5 Days</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Coordinate Inputs (Auto-populated or Custom) -->
+            <div class="predictor-coords-row" style="margin-bottom: 14px;">
+                <div class="form-group" style="flex: 1.8; min-width: 140px;">
+                    <label class="form-label">Location Name</label>
+                    <input type="text" id="pred-name-input" class="form-input" value="Bengaluru, India" disabled>
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 90px;">
+                    <label class="form-label">Latitude</label>
+                    <input type="text" id="pred-lat-input" class="form-input" value="12.9716" disabled>
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 90px;">
+                    <label class="form-label">Longitude</label>
+                    <input type="text" id="pred-lon-input" class="form-input" value="77.5946" disabled>
+                </div>
+                <button class="btn-action btn-accent" id="btn-calculate-flyovers" style="height: 35px; white-space: nowrap; background: rgba(234, 179, 8, 0.2); border-color: var(--gold); color: #facc15; flex-shrink: 0;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Calculate
+                </button>
+            </div>
+
+            <!-- Live Next Pass Countdown Banner -->
+            <div id="pred-countdown-banner" class="countdown-banner" style="margin-bottom: 12px;">
+                <div class="countdown-text">
+                    <h4 id="pred-countdown-time">CALCULATING NEXT PASS...</h4>
+                    <p id="pred-countdown-detail">Observer Coordinates: Indian Standard Time (IST)</p>
+                </div>
+                <span class="badge-count" id="pred-total-count" style="background: rgba(250, 204, 21, 0.2); color: #facc15;">0 FLYOVERS</span>
+            </div>
+
+            <!-- Upcoming Passes Feed -->
+            <div class="passes-container" id="pred-passes-container"></div>
+        </div>
+    </div>
+
+    <!-- Feature 5: Automated Flyover Email Notification Dispatcher Modal -->
+    <div id="alert-modal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 650px; width: 650px; box-sizing: border-box;">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span>Automated Flyover Email Dispatcher</span>
+                </div>
+                <button class="modal-close-btn" id="btn-close-alert-modal">&times;</button>
+            </div>
+
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+                Get automated email alerts when the Space Station is about to pass over your location. The background engine calculates Orekit SGP4 orbital passes and dispatches viewing coordinates in IST.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                <div class="form-group">
+                    <label class="form-label">Recipient Email Address *</label>
+                    <input type="email" id="alert-email-input" class="form-input" placeholder="e.g. yourname@gmail.com" required>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1.5; min-width: 220px;">
+                        <label class="form-label">Target Location / City</label>
+                        <select id="alert-city-select" class="form-select"></select>
+                    </div>
+
+                    <div class="form-group" style="flex: 1; min-width: 180px;">
+                        <label class="form-label">Minimum Elevation</label>
+                        <select id="alert-min-elev-select" class="form-select">
+                            <option value="15.0">Any Visible Pass (≥ 15°)</option>
+                            <option value="40.0" selected>High Overhead Pass (≥ 40° ⭐)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Latitude</label>
+                        <input type="text" id="alert-lat-input" class="form-input" value="12.9716" disabled>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Longitude</label>
+                        <input type="text" id="alert-lon-input" class="form-input" value="77.5946" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dispatch Options Cards: Instant Test vs Automated Background -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                <!-- Option 1: Instant Test Email -->
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(250, 204, 21, 0.25); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.8rem; color: #facc15; margin-bottom: 4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            Instant Test Dispatch
+                        </div>
+                        <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; margin: 0 0 10px 0;">
+                            Calculate upcoming pass & send an immediate test email right now to verify inbox delivery.
+                        </p>
+                    </div>
+                    <button class="btn-action" id="btn-send-test-alert" style="width: 100%; height: 34px; justify-content: center; background: rgba(234, 179, 8, 0.25); border-color: var(--gold); color: #facc15; font-size: 0.74rem;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        Send Instant Test Email
+                    </button>
+                </div>
+
+                <!-- Option 2: Automated Background Subscription -->
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.8rem; color: #38bdf8; margin-bottom: 4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Automated Background Alert
+                        </div>
+                        <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; margin: 0 0 10px 0;">
+                            Backend daemon evaluates passes every 10 min. Auto-dispatches an email 2 hours before ISS arrives!
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn-action btn-accent" id="btn-subscribe-alerts" style="flex: 1; height: 34px; justify-content: center; background: rgba(56, 189, 248, 0.25); border-color: var(--cyan); color: #38bdf8; font-size: 0.74rem;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                            Subscribe
+                        </button>
+                        <button class="btn-action" id="btn-unsubscribe-alerts" style="height: 34px; border-color: rgba(239, 68, 68, 0.4); color: #f87171; font-size: 0.72rem; padding: 0 10px;">
+                            Unsubscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-Time Feedback Alert Box -->
+            <div id="alert-feedback" style="display: none; padding: 12px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 16px; line-height: 1.4;"></div>
+
+            <!-- Recent Dispatched Notification Audit Logs -->
+            <div style="margin-top: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 0.72rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted);">Recent Notification Dispatch Logs</span>
+                    <button id="btn-refresh-alert-logs" style="background: none; border: none; color: var(--cyan); cursor: pointer; font-size: 0.72rem; font-weight: 600;">🔄 Refresh Logs</button>
+                </div>
+                <div id="alert-logs-container" style="max-height: 160px; overflow-y: auto; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 8px;">
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; padding: 8px;">No notifications dispatched yet.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet.js Library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Modular Application Script -->
+    <script src="/js/app.js"></script>
+</body>
+</html>
