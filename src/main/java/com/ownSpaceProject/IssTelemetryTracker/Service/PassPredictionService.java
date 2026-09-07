@@ -43,13 +43,12 @@ public class PassPredictionService {
     @jakarta.annotation.PostConstruct
     public void initOrekitData() {
         try {
-            java.io.File orekitData = new java.io.File("D:/My Projects/Space Projects/orekit-data-main");
-            if (orekitData.exists()) {
-                org.orekit.data.DataProvidersManager manager = org.orekit.data.DataContext.getDefault().getDataProvidersManager();
-                manager.addProvider(new org.orekit.data.DirectoryCrawler(orekitData));
+            org.orekit.data.DataProvidersManager manager = org.orekit.data.DataContext.getDefault().getDataProvidersManager();
+            if (manager.getProviders().isEmpty()) {
+                manager.addProvider(new org.orekit.data.ClasspathCrawler(getClass().getClassLoader(), "orekit-data.zip"));
             }
         } catch (Exception e) {
-            System.err.println("[PassPredictionService] Orekit data initialization info: " + e.getMessage());
+            System.err.println("[PassPredictionService] Orekit data initialization: " + e.getMessage());
         }
     }
 

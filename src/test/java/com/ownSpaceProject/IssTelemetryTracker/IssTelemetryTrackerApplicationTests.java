@@ -83,4 +83,27 @@ class IssTelemetryTrackerApplicationTests {
         boolean unsubResult = dispatcherService.unsubscribe("test.observer@space.org");
         assertTrue(unsubResult);
     }
+
+    @Autowired
+    private com.ownSpaceProject.IssTelemetryTracker.Service.IssVelService issVelService;
+
+    @Test
+    void testIssVelocityAndOrekitPropagation() {
+        assertNotNull(issVelService);
+        double vel = issVelService.issVelocity();
+        System.out.println("Calculated ISS Velocity via Orekit: " + vel + " km/s");
+        assertTrue(vel > 7.0 && vel < 8.0, "ISS orbital speed should be ~7.66 km/s");
+    }
+
+    @Autowired
+    private com.ownSpaceProject.IssTelemetryTracker.Service.GroundStationExcelService excelService;
+
+    @Test
+    void testGenerateSampleGroundStationsFile() throws Exception {
+        assertNotNull(excelService);
+        byte[] bytes = excelService.generateSampleTemplate();
+        assertNotNull(bytes);
+        java.nio.file.Files.write(java.nio.file.Paths.get("samples/sample_ground_stations.xlsx"), bytes);
+        System.out.println("Generated samples/sample_ground_stations.xlsx successfully!");
+    }
 }

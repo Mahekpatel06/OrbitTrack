@@ -15,7 +15,7 @@ public class IssTrackerService {
     @Autowired
     private IssVelService issVelService;
 
-    @Value("${app.n2yo.api-key:GDRK25-KYTYXB-A9ZAYL-5SW7}")
+    @Value("${app.n2yo.api-key}")
     private String apiKey;
 
     @Value("${app.n2yo.base-url:https://api.n2yo.com/rest/v1/satellite/positions}")
