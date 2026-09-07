@@ -341,7 +341,7 @@
 
     <!-- Feature 5: Automated Flyover Email Notification Dispatcher Modal -->
     <div id="alert-modal" class="modal-overlay">
-        <div class="modal-card" style="max-width: 650px; width: 650px; box-sizing: border-box;">
+        <div class="modal-card" style="max-width: 630px; width: 630px; box-sizing: border-box;">
             <div class="modal-header">
                 <div class="modal-title">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -350,23 +350,23 @@
                 <button class="modal-close-btn" id="btn-close-alert-modal">&times;</button>
             </div>
 
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+            <p style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px; line-height: 1.35;">
                 Get automated email alerts when the Space Station is about to pass over your location. The background engine calculates Orekit SGP4 orbital passes and dispatches viewing coordinates in IST.
             </p>
 
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
                 <div class="form-group">
                     <label class="form-label">Recipient Email Address *</label>
                     <input type="email" id="alert-email-input" class="form-input" placeholder="e.g. yourname@gmail.com" required>
                 </div>
 
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <div class="form-group" style="flex: 1.5; min-width: 220px;">
+                    <div class="form-group" style="flex: 1.5; min-width: 200px;">
                         <label class="form-label">Target Location / City</label>
                         <select id="alert-city-select" class="form-select"></select>
                     </div>
 
-                    <div class="form-group" style="flex: 1; min-width: 180px;">
+                    <div class="form-group" style="flex: 1; min-width: 170px;">
                         <label class="form-label">Minimum Elevation</label>
                         <select id="alert-min-elev-select" class="form-select">
                             <option value="15.0">Any Visible Pass (≥ 15°)</option>
@@ -388,41 +388,41 @@
             </div>
 
             <!-- Dispatch Options Cards: Instant Test vs Automated Background -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                 <!-- Option 1: Instant Test Email -->
-                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(250, 204, 21, 0.25); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(250, 204, 21, 0.25); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.8rem; color: #facc15; margin-bottom: 4px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.78rem; color: #facc15; margin-bottom: 3px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                             Instant Test Dispatch
                         </div>
-                        <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; margin: 0 0 10px 0;">
+                        <p style="font-size: 0.69rem; color: var(--text-muted); line-height: 1.3; margin: 0 0 8px 0;">
                             Calculate upcoming pass & send an immediate test email right now to verify inbox delivery.
                         </p>
                     </div>
-                    <button class="btn-action" id="btn-send-test-alert" style="width: 100%; height: 34px; justify-content: center; background: rgba(234, 179, 8, 0.25); border-color: var(--gold); color: #facc15; font-size: 0.74rem;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    <button class="btn-action" id="btn-send-test-alert" style="width: 100%; height: 32px; justify-content: center; background: rgba(234, 179, 8, 0.25); border-color: var(--gold); color: #facc15; font-size: 0.72rem;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                         Send Instant Test Email
                     </button>
                 </div>
 
                 <!-- Option 2: Automated Background Subscription -->
-                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.8rem; color: #38bdf8; margin-bottom: 4px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.78rem; color: #38bdf8; margin-bottom: 3px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             Automated Background Alert
                         </div>
-                        <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; margin: 0 0 10px 0;">
+                        <p style="font-size: 0.69rem; color: var(--text-muted); line-height: 1.3; margin: 0 0 8px 0;">
                             Backend daemon evaluates passes every 10 min. Auto-dispatches an email 2 hours before ISS arrives!
                         </p>
                     </div>
                     <div style="display: flex; gap: 6px;">
-                        <button class="btn-action btn-accent" id="btn-subscribe-alerts" style="flex: 1; height: 34px; justify-content: center; background: rgba(56, 189, 248, 0.25); border-color: var(--cyan); color: #38bdf8; font-size: 0.74rem;">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                        <button class="btn-action btn-accent" id="btn-subscribe-alerts" style="flex: 1; height: 32px; justify-content: center; background: rgba(56, 189, 248, 0.25); border-color: var(--cyan); color: #38bdf8; font-size: 0.72rem;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
                             Subscribe
                         </button>
-                        <button class="btn-action" id="btn-unsubscribe-alerts" style="height: 34px; border-color: rgba(239, 68, 68, 0.4); color: #f87171; font-size: 0.72rem; padding: 0 10px;">
+                        <button class="btn-action" id="btn-unsubscribe-alerts" style="height: 32px; border-color: rgba(239, 68, 68, 0.4); color: #f87171; font-size: 0.7rem; padding: 0 8px;">
                             Unsubscribe
                         </button>
                     </div>
@@ -430,16 +430,16 @@
             </div>
 
             <!-- Real-Time Feedback Alert Box -->
-            <div id="alert-feedback" style="display: none; padding: 12px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 16px; line-height: 1.4;"></div>
+            <div id="alert-feedback" style="display: none; padding: 8px 12px; border-radius: 6px; font-size: 0.76rem; margin-bottom: 10px; line-height: 1.35;"></div>
 
             <!-- Recent Dispatched Notification Audit Logs -->
-            <div style="margin-top: 6px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 0.72rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted);">Recent Notification Dispatch Logs</span>
-                    <button id="btn-refresh-alert-logs" style="background: none; border: none; color: var(--cyan); cursor: pointer; font-size: 0.72rem; font-weight: 600;">🔄 Refresh Logs</button>
+            <div style="margin-top: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted);">Recent Notification Dispatch Logs</span>
+                    <button id="btn-refresh-alert-logs" style="background: none; border: none; color: var(--cyan); cursor: pointer; font-size: 0.7rem; font-weight: 600;">🔄 Refresh Logs</button>
                 </div>
-                <div id="alert-logs-container" style="max-height: 160px; overflow-y: auto; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 8px;">
-                    <div style="text-align: center; color: var(--text-muted); font-size: 0.75rem; padding: 8px;">No notifications dispatched yet.</div>
+                <div id="alert-logs-container" style="max-height: 110px; overflow-y: auto; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 6px 8px;">
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.72rem; padding: 6px;">No notifications dispatched yet.</div>
                 </div>
             </div>
         </div>
