@@ -115,7 +115,7 @@ spring.datasource.password=your_password
 ### 4. Access Dashboard
 Open your browser at:
 ```
-http://localhost:8080
+http://localhost:8086
 ```
 
 #### A ready-to-test sample file is included in `samples/sample_ground_stations.xlsx`
