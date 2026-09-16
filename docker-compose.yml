@@ -1,0 +1,22 @@
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: iss-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgre
+      POSTGRES_DB: iss_db
+
+  iss-app:
+    build: .
+    container_name: iss-tracker
+    ports:
+      - "8086:8086"
+    depends_on:
+      - postgres-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/iss_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgre

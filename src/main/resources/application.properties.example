@@ -1,21 +1,29 @@
+# ---------------------------------------------------------
+# OrbitTrack Application Configuration Template
+# Copy this file to 'application.properties' and fill in your credentials
+# ---------------------------------------------------------
+
 spring.application.name=IssTelemetryTracker
+
+# PostgreSQL Database Configuration
 spring.datasource.driver-class-name=org.postgresql.Driver
 spring.datasource.url=jdbc:postgresql://localhost:5432/telemetrydb
-spring.datasource.username={your_postgre_username}
-spring.datasource.password={your_postgre_password}
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:postgres}
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.show-sql=false
 
-
+# ---------------------------------------------------------
 # Space Telemetry & Satellite Configuration
+# ---------------------------------------------------------
 
 # Target NORAD Satellite Catalog ID (25544 is ISS)
 app.satellite.norad-id=25544
 
-# N2YO Satellite API Configuration
-app.n2yo.api-key={your_n2yo_api_key}
+# N2YO Satellite API Configuration (Get free key at https://www.n2yo.com/api/)
+app.n2yo.api-key=${N2YO_API_KEY:YOUR_N2YO_API_KEY}
 app.n2yo.base-url=https://api.n2yo.com/rest/v1/satellite/positions
 app.n2yo.observer-lat=22.55896
 app.n2yo.observer-lon=72.91993
@@ -30,19 +38,18 @@ app.geofence.max-distance-km=2000.0
 # ---------------------------------------------------------
 # Automated Flyover Email Notification Dispatcher
 # ---------------------------------------------------------
-# Set to 'true' to dispatch real emails via SMTP. Set to 'false' for local simulation logging.
+# Set to 'true' to dispatch real emails via SMTP, or 'false' for local simulation mode
 app.notifications.mail-enabled=true
-
+app.notifications.sender-email=${MAIL_USERNAME:your_email@gmail.com}
 app.notifications.window-hours=2
 
 # SMTP Configuration (Gmail SMTP)
-# IMPORTANT:
-# 1. Put your real Gmail address in spring.mail.username
-# 2. Put your 16-character Google App Password in spring.mail.password (e.g. abcd efgh ijkl mnop)
+# 1. Enable 2-Step Verification in Google Account
+# 2. Generate a 16-character App Password (Security -> 2-Step Verification -> App Passwords)
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username={your_email}
-spring.mail.password={your_16-char_google_app_password}
+spring.mail.username=${MAIL_USERNAME:your_email@gmail.com}
+spring.mail.password=${MAIL_PASSWORD:your_app_password}
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 spring.mail.properties.mail.smtp.starttls.required=true
