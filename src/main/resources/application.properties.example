@@ -43,6 +43,11 @@ app.notifications.mail-enabled=true
 app.notifications.sender-email=${MAIL_USERNAME:your_email@gmail.com}
 app.notifications.window-hours=2
 
+# Cloud HTTP Email Delivery (Render Free Tier - HTTPS Port 443)
+# Get free API key from https://www.brevo.com (300 emails/day) or https://resend.com (3,000/mo)
+app.email.brevo-api-key=${BREVO_API_KEY:}
+app.email.resend-api-key=${RESEND_API_KEY:}
+
 # SMTP Configuration (Gmail SMTP)
 # 1. Enable 2-Step Verification in Google Account
 # 2. Generate a 16-character App Password (Security -> 2-Step Verification -> App Passwords)

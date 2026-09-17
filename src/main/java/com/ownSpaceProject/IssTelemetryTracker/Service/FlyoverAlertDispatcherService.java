@@ -42,6 +42,14 @@ public class FlyoverAlertDispatcherService {
     @Value("${app.notifications.window-hours:2}")
     private int windowHours;
 
+    private final org.springframework.web.client.RestClient restClient = org.springframework.web.client.RestClient.builder().build();
+
+    @Value("${app.email.brevo-api-key:${BREVO_API_KEY:}}")
+    private String brevoApiKey;
+
+    @Value("${app.email.resend-api-key:${RESEND_API_KEY:}}")
+    private String resendApiKey;
+
     /**
      * Registers or updates a user subscription for flyover email alerts.
      */
@@ -178,33 +186,94 @@ public class FlyoverAlertDispatcherService {
         String deliveryMode = "SIMULATED_LOG";
         String statusMessage = null;
 
-        // Auto-detect if SMTP credentials have been provided and are not placeholders
-        boolean attemptsSmtp = mailEnabled && isMailConfigured() && mailSender != null;
         String effectiveSender = (mailUsername != null && mailUsername.contains("@") && !mailUsername.contains("your-email")) 
                 ? mailUsername.trim() 
                 : (senderEmail != null && !senderEmail.isEmpty() ? senderEmail : "mission-control@isstracker.space");
 
-        if (attemptsSmtp) {
+        // 1. Try Brevo HTTP API (Port 443 HTTPS - 100% works on Render Free Tier!)
+        if (brevoApiKey != null && !brevoApiKey.trim().isEmpty() && !brevoApiKey.contains("your-brevo")) {
             try {
-                MimeMessage message = mailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-                helper.setFrom(effectiveSender, "ISS Mission Control");
-                helper.setTo(recipient);
-                helper.setSubject(subject);
-                helper.setText(htmlContent, true);
-                mailSender.send(message);
-                deliveryMode = "DELIVERED_SMTP";
-                statusMessage = "Real email dispatched successfully to " + recipient + " via Gmail SMTP!";
-                log.info("[SMTP SUCCESS] Dispatched flyover alert email to: {} from: {} for pass at {}", recipient, effectiveSender, pass.getFormattedAosIst());
+                java.util.Map<String, Object> brevoPayload = java.util.Map.of(
+                        "sender", java.util.Map.of("name", "OrbitTrack Mission Control", "email", effectiveSender),
+                        "to", java.util.List.of(java.util.Map.of("email", recipient)),
+                        "subject", subject,
+                        "htmlContent", htmlContent
+                );
+
+                restClient.post()
+                        .uri("https://api.brevo.com/v3/smtp/email")
+                        .header("api-key", brevoApiKey.trim())
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .body(brevoPayload)
+                        .retrieve()
+                        .toBodilessEntity();
+
+                deliveryMode = "DELIVERED_BREVO_HTTP";
+                statusMessage = "Real email dispatched successfully to " + recipient + " via Brevo HTTP API (HTTPS port 443)!";
+                log.info("[BREVO SUCCESS] Dispatched flyover alert email to: {} via Brevo API", recipient);
             } catch (Exception e) {
-                deliveryMode = "SMTP_FAILED";
-                statusMessage = "SMTP Delivery Failed: " + e.getMessage() + ". Check your Google App Password and username in application.properties.";
-                log.error("[SMTP ERROR] Failed to send via real SMTP to {}: {}", recipient, e.getMessage());
+                log.error("[BREVO ERROR] Failed to send via Brevo API: {}", e.getMessage());
             }
-        } else {
-            deliveryMode = "SIMULATED_LOG";
-            statusMessage = "Simulated email dispatch logged. Set app.notifications.mail-enabled=true with your Gmail credentials in application.properties for real inbox delivery.";
-            log.info("[SIMULATED EMAIL DISPATCH] Dispatched simulated alert to: {} for pass at {}", recipient, pass.getFormattedAosIst());
+        }
+
+        // 2. Try Resend HTTP API (Port 443 HTTPS - 100% works on Render Free Tier!)
+        if (!deliveryMode.startsWith("DELIVERED") && resendApiKey != null && !resendApiKey.trim().isEmpty() && !resendApiKey.contains("your-resend")) {
+            try {
+                java.util.Map<String, Object> resendPayload = java.util.Map.of(
+                        "from", "OrbitTrack Mission Control <onboarding@resend.dev>",
+                        "to", java.util.List.of(recipient),
+                        "subject", subject,
+                        "html", htmlContent
+                );
+
+                restClient.post()
+                        .uri("https://api.resend.com/emails")
+                        .header("Authorization", "Bearer " + resendApiKey.trim())
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .body(resendPayload)
+                        .retrieve()
+                        .toBodilessEntity();
+
+                deliveryMode = "DELIVERED_RESEND_HTTP";
+                statusMessage = "Real email dispatched successfully to " + recipient + " via Resend HTTP API (HTTPS port 443)!";
+                log.info("[RESEND SUCCESS] Dispatched flyover alert email to: {} via Resend API", recipient);
+            } catch (Exception e) {
+                log.error("[RESEND ERROR] Failed to send via Resend API: {}", e.getMessage());
+            }
+        }
+
+        // 3. Try Standard SMTP (Port 587 - works on local development or non-blocked hosts)
+        if (!deliveryMode.startsWith("DELIVERED")) {
+            boolean attemptsSmtp = mailEnabled && isMailConfigured() && mailSender != null;
+            if (attemptsSmtp) {
+                try {
+                    MimeMessage message = mailSender.createMimeMessage();
+                    MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+                    helper.setFrom(effectiveSender, "ISS Mission Control");
+                    helper.setTo(recipient);
+                    helper.setSubject(subject);
+                    helper.setText(htmlContent, true);
+                    mailSender.send(message);
+                    deliveryMode = "DELIVERED_SMTP";
+                    statusMessage = "Real email dispatched successfully to " + recipient + " via Gmail SMTP!";
+                    log.info("[SMTP SUCCESS] Dispatched flyover alert email to: {} from: {} for pass at {}", recipient, effectiveSender, pass.getFormattedAosIst());
+                } catch (Exception e) {
+                    String exStr = (e.getMessage() + " " + e.getClass().getName()).toLowerCase();
+                    if (exStr.contains("sockettimeoutexception") || exStr.contains("timed out") || exStr.contains("mailconnectexception") || exStr.contains("couldn't connect")) {
+                        deliveryMode = "SIMULATED_LOG_FALLBACK";
+                        statusMessage = "Cloud host firewall blocked outbound SMTP port 587 (Render Free tier policy blocks raw mail ports to prevent spam). Set BREVO_API_KEY or RESEND_API_KEY for HTTP delivery, or test locally!";
+                        log.warn("[SMTP TIMEOUT FALLBACK] Outbound SMTP port blocked by cloud host. Gracefully fell back to simulation mode for: {}", recipient);
+                    } else {
+                        deliveryMode = "SMTP_FAILED";
+                        statusMessage = "SMTP Delivery Failed: " + e.getMessage() + ". Check your Google App Password and username in application.properties.";
+                        log.error("[SMTP ERROR] Failed to send via real SMTP to {}: {}", recipient, e.getMessage());
+                    }
+                }
+            } else {
+                deliveryMode = "SIMULATED_LOG";
+                statusMessage = "Simulated email dispatch logged. Set BREVO_API_KEY (for Render) or Gmail credentials for real inbox delivery.";
+                log.info("[SIMULATED EMAIL DISPATCH] Dispatched simulated alert to: {} for pass at {}", recipient, pass.getFormattedAosIst());
+            }
         }
 
         // Record in database audit log

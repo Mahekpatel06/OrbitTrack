@@ -1580,8 +1580,9 @@ function setupFlyoverAlertModal() {
             if (!res.ok) throw new Error(`Server returned ${res.status}`);
             const data = await res.json();
 
-            if (data.deliveryMode === 'DELIVERED_SMTP') {
-                showFeedback('success', `📬 <b>Real Email Sent!</b> Check your inbox at <b>${data.recipient}</b>.<br>ISS flyover alert for <b>${data.targetCity}</b> at <b>${data.upcomingPassIst}</b> (Max Elev: <b>${data.maxElevationDeg}°</b>) successfully delivered via Gmail SMTP.`);
+            if (data.deliveryMode && data.deliveryMode.startsWith('DELIVERED')) {
+                const provider = data.deliveryMode.includes('BREVO') ? 'Brevo HTTP API' : (data.deliveryMode.includes('RESEND') ? 'Resend HTTP API' : 'Gmail SMTP');
+                showFeedback('success', `📬 <b>Real Email Sent!</b> Check your inbox at <b>${data.recipient}</b>.<br>ISS flyover alert for <b>${data.targetCity}</b> at <b>${data.upcomingPassIst}</b> (Max Elev: <b>${data.maxElevationDeg}°</b>) successfully delivered via ${provider}.`);
             } else if (data.deliveryMode === 'SMTP_FAILED') {
                 showFeedback('error', `⚠️ <b>SMTP Failed:</b> ${data.message}`);
             } else {
