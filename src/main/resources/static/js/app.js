@@ -9,7 +9,6 @@ let allGroundStationsData = [];
 let projectedOrbitPolylines = [];
 let orbitArrowMarkers = [];
 let terminatorPolygon = null;
-let subsolarMarker = null;
 
 let autoCenter = true;
 let showGeofences = true;
@@ -43,14 +42,6 @@ const issIcon = L.divIcon({
     `,
     iconSize: [48, 48],
     iconAnchor: [24, 24]
-});
-
-// Sun Subsolar Icon
-const sunIcon = L.divIcon({
-    className: 'subsolar-marker',
-    html: `☀️`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14]
 });
 
 // Application Lifecycle
@@ -151,9 +142,6 @@ function updateDayNightTerminator() {
     if (terminatorPolygon) {
         map.removeLayer(terminatorPolygon);
     }
-    if (subsolarMarker) {
-        map.removeLayer(subsolarMarker);
-    }
 
     const now = new Date();
 
@@ -171,10 +159,6 @@ function updateDayNightTerminator() {
     let subsolarLon = (12 - utcHours) * 15;
     if (subsolarLon > 180) subsolarLon -= 360;
     if (subsolarLon < -180) subsolarLon += 360;
-
-    // Place Glowing Sun Icon at Subsolar Point
-    subsolarMarker = L.marker([declinationDeg, subsolarLon], { icon: sunIcon }).addTo(map);
-    subsolarMarker.bindPopup(`<b>☀️ Solar Subsolar Point</b><br>Sun directly overhead at Latitude ${declinationDeg.toFixed(1)}°, Longitude ${subsolarLon.toFixed(1)}°`);
 
     // Compute Terminator boundary curve
     const terminatorPoints = [];
@@ -934,10 +918,6 @@ function setupControls() {
         if (terminatorPolygon) {
             if (showTerminator) map.addLayer(terminatorPolygon);
             else map.removeLayer(terminatorPolygon);
-        }
-        if (subsolarMarker) {
-            if (showTerminator) map.addLayer(subsolarMarker);
-            else map.removeLayer(subsolarMarker);
         }
     });
 
